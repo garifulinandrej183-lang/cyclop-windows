@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../src/Cyclop.Core/Media/SpotifyVolumeSnapshot.cs" Link="Core/SpotifyVolumeSnapshot.cs" />
+    <Compile Include="../../src/Cyclop.Windows/Media/SpotifyVolumeService.cs" Link="Media/SpotifyVolumeService.cs" />
+  </ItemGroup>
+</Project>

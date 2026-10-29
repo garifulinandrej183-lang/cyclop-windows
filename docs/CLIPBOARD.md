@@ -1,0 +1,25 @@
+# Clipboard history and file shelf
+
+## Privacy and history
+
+Clipboard history is **off by default**. The user must enable recording in Settings. Pausing stops history capture; image auto-save is a separate opt-in because it writes an ordinary PNG that can be opened by other applications. Capturing either history or an opted-in image first checks the clipboard formats for `ExcludeClipboardContentFromMonitorProcessing` and the registered `CanIncludeInClipboardHistory` DWORD. A present `CanIncludeInClipboardHistory` value must be a valid DWORD equal to `1`; zero, a malformed value, or a busy clipboard is treated as excluded. No text, file list, or image payload is requested before this gate.
+
+One message-only STA window listens to `WM_CLIPBOARDUPDATE` through `AddClipboardFormatListener`; there is no polling. A busy clipboard is retried with a bounded delay and the read is abandoned when the sequence changes. Writes made by Cyclop carry an internal registered format, so restoring an entry does not capture it again.
+
+The Windows application's history now captures and displays text/links only. New PNG and file-list payloads never enter history; PNG auto-save remains a separate shelf opt-in. The observer's per-kind policy avoids requesting image bytes when image auto-save is off and does not request copied-file payloads for history. Legacy encrypted image/file rows remain under existing retention/clear rules but are hidden from the list and search; there is no automatic destructive migration or assumption that every old image is already present on the shelf. The displayed counter counts text records only.
+
+SQLite/DPAPI persistence, loading, pruning and bulk image/file work are dispatched off the UI thread. This is deliberate: Microsoft.Data.Sqlite's async APIs still perform synchronous SQLite I/O ([Microsoft documentation](https://learn.microsoft.com/en-us/dotnet/standard/data/sqlite/async)). The clipboard API itself remains on the WPF STA; restore first checks native clipboard availability before calling WPF to avoid its internal retry loop when already locked.
+
+History rows are serialized in memory, protected with Windows DPAPI `CurrentUser`, and only then written as BLOBs in SQLite. Preview, content hashes, and search indexes stay in memory. Search decrypts the bounded history in memory. The core storage reader retains compatibility with size-bounded legacy file/image payloads, while the app only records text. The default retained payload-memory budget is 64 MiB in addition to item/age limits; pins are preferred but cannot bypass hard limits. SQLite loading also has a 128 MiB encrypted-input budget and fails with a visible error instead of allocating unbounded history. No image thumbnails are decoded in the text-only history pane. The history supports pinning, deduplication, pause, restore, delete, and clear. Clearing history also clears hidden legacy rows, and never removes shelf PNGs.
+
+## Shelf and screenshots
+
+Ordinary shelf items persist as path references; deleting or clearing a card does not delete its original file. A file dragged back out uses WPF's copy effect. Managed screenshots are ordinary PNG files in the app's managed screenshot folder and are separate from encrypted history. Clearing history never removes shelf PNGs. The managed image limit only removes the oldest generated PNGs when that limit is applied; it never traverses or deletes a watched source folder or an original reference.
+
+The shelf toolbar's trash button clears all cards while preserving saved PNGs and referenced originals. Wheel down scrolls the shelf right; wheel up scrolls left, with partial wheel deltas supported. Externally deleted managed screenshots are removed from the shelf index by a debounced filesystem watcher, on load and when opening the shelf. Unknown I/O/access failures do not prove deletion. Unavailable ordinary references remain available for reconnection. Deleting a watched source screenshot leaves its existing managed copy intact.
+
+Clipboard images can be saved to the shelf only after the separate image-save setting is enabled. Pixel hashes are computed from decoded BGRA pixels with WIC so PNGs from clipboard and the watched folder deduplicate even if their encodings differ. The fallback core fingerprint uses encoded bytes; the Windows app injects `WpfImageFingerprint`.
+
+Watching a screenshot folder is off until the user selects a folder. The watcher observes only that directory (not subdirectories), waits for stable file size with bounded retries, deduplicates paths and pixel content, and reconciles after `FileSystemWatcher` overflow. It imports copies into managed storage and leaves source screenshots unchanged. Existing files present when watching starts are treated as existing, not as new screenshots.
+
+The app does not identify clipboard images as Lightshot screenshots: the source application is not reliably available from standard clipboard formats. Auto-save is therefore described as saving copied images, not as Lightshot detection.

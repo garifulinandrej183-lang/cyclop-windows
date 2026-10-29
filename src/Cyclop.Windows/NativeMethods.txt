@@ -1,0 +1,4 @@
+GetForegroundWindow
+GetWindowRect
+IsWindowVisible
+GetWindowThreadProcessId

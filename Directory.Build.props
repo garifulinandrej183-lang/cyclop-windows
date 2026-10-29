@@ -1,0 +1,14 @@
+<Project>
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>14.0</LangVersion>
+    <Deterministic>true</Deterministic>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <Version>0.1.0</Version>
+    <Authors>Cyclop Windows contributors</Authors>
+    <Copyright>Copyright (c) 2026 akalikbergenov and Cyclop Windows contributors</Copyright>
+  </PropertyGroup>
+</Project>

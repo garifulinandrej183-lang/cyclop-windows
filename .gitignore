@@ -1,0 +1,16 @@
+**/bin/
+**/obj/
+.tools/
+artifacts/
+upstream/
+**/.venv/
+**/__pycache__/
+TestResults/
+*.user
+*.log
+# Local agent instructions, design briefs and workstation verification records.
+AGENTS.md
+AGENTS.override.md
+PRODUCT.md
+DESIGN.md
+docs/VERIFICATION.md
