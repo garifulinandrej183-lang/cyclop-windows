@@ -10,9 +10,10 @@ try {
     $stage = Join-Path $PSScriptRoot 'artifacts\publish\Cyclop-Windows-0.1.0-win-x64'
     # .NET output is never edited; publish to a fresh staging directory every time.
     if (Test-Path -LiteralPath $stage) { $stage = "$stage-$(Get-Date -Format yyyyMMddHHmmss)" }
-    & $sdk publish src/Cyclop.App/Cyclop.App.csproj -c Release -r win-x64 --self-contained true -p:RestoreLockedMode=true -p:PublishTrimmed=false -p:PublishAot=false -o $stage
+    & $sdk publish src/Cyclop.App/Cyclop.App.csproj -c Release -r win-x64 --self-contained true -p:RestoreLockedMode=true -p:PublishTrimmed=false -p:PublishAot=false -p:DebugType=None -p:DebugSymbols=false -p:CopyOutputSymbolsToPublishDirectory=false -o $stage
     Assert-LastExit 'Publish'
     Copy-Item -LiteralPath $workerPath -Destination (Join-Path $stage 'worker') -Recurse
+    if (Get-ChildItem -LiteralPath $stage -File -Recurse -Filter '*.pdb') { throw 'Debug symbols must not be included in release packages.' }
     Copy-Item -LiteralPath README.md, README.ru.md -Destination $stage
     $publicDocs = Join-Path $stage 'docs'
     New-Item -ItemType Directory -Path $publicDocs -Force | Out-Null

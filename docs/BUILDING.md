@@ -16,6 +16,8 @@ The repository contains NuGet lock files and a hash-pinned worker dependency loc
 
 The Python setup script sets `CYCLOP_PYTHON` for the current PowerShell session. Alternatively, point that variable to a Python 3.12.14 executable. Both setup scripts download their pinned tools and validate their SHA-256 hashes. `build-worker.ps1` creates `worker/.venv`, installs hash-locked dependencies and freezes the translator worker. `publish.ps1` runs the .NET tests again, stages a self-contained x64 app and worker, verifies the ZIP and creates a per-user Setup and checksums in `artifacts`. Without `-SkipWorkerBuild`, it builds the worker itself. Pass `-IsccPath` to `publish.ps1` when Inno Setup is installed outside its searched locations.
 
+Release publishing disables .NET debug symbols. The staging and ZIP checks reject any `.pdb` file so workstation source paths in debug metadata are not distributed.
+
 To run a development build after building the app and worker:
 
 ```powershell

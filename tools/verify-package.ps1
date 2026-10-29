@@ -23,6 +23,6 @@ try {
         $checked++
     }
     if ($entries.Count -ne $checked + 1) { throw 'Unexpected unlisted files in portable ZIP.' }
-    if ($entries.Keys.Where({ $_ -match '(?i)(^|/)cudnn[^/]*\.dll$|(^|/)(AGENTS\.md|\.git)(/|$)' }).Count -gt 0) { throw 'Unexpected build-only or GPU files in package.' }
+    if ($entries.Keys.Where({ $_ -match '(?i)\.pdb$|(^|/)cudnn[^/]*\.dll$|(^|/)(AGENTS\.md|\.git)(/|$)' }).Count -gt 0) { throw 'Unexpected debug symbols, build-only or GPU files in package.' }
     Write-Host "PASS: portable ZIP contains $checked files matching SHA-256 manifest."
 } finally { $archive.Dispose() }
